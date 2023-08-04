@@ -23,6 +23,8 @@ namespace ImageSender_Server.ViewModels
             set { image = value; OnPropertyChanged(); }
         }
 
+        public bool IsCreated { get; set; } = false;
+
         [Obsolete]
         public MainViewModel()
         {
@@ -31,30 +33,38 @@ namespace ImageSender_Server.ViewModels
 
             CreateServerCommand = new RelayCommand((obj) =>
             {
-                Task.Run(() =>
+                if (!IsCreated)
                 {
-                    var ipAddress = IPAddress.Parse(myIP);
-                    var port = 27001;
-                    using (var socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
+                    Task.Run(() =>
                     {
-                        var endPoint = new IPEndPoint(ipAddress, port);
-                        socket.Bind(endPoint);
-                        socket.Listen(10);
-                        var client = socket.Accept();
-                        MessageBox.Show($"Client connected {client.RemoteEndPoint}");
-                        Task.Run(() =>
+                        var ipAddress = IPAddress.Parse(myIP);
+                        var port = 27001;
+                        using (var socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
                         {
-                            var length = 0;
-                            var bytes = new byte[300000];
-                            do
+                            var endPoint = new IPEndPoint(ipAddress, port);
+                            socket.Bind(endPoint);
+                            socket.Listen(10);
+                            IsCreated = true;
+                            var client = socket.Accept();
+                            Task.Run(() =>
                             {
-                                length = client.Receive(bytes);
-                                Image = LoadImage(bytes);
-                                break;
-                            } while (length > 0);
-                        });
-                    }
-                });
+                                var length = 0;
+                                var bytes = new byte[300000];
+                                do
+                                {
+                                    length = client.Receive(bytes);
+                                    Image = LoadImage(bytes);
+                                    break;
+                                } while (length > 0);
+                            });
+                        }
+                    });
+                }
+
+                else
+                {
+                    MessageBox.Show("The server is already created.", "Error!", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
             });
         }
 
