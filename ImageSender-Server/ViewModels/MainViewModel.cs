@@ -1,4 +1,4 @@
-﻿using ImageSender_Server.Commands;
+using ImageSender_Server.Commands;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -25,7 +25,6 @@ namespace ImageSender_Server.ViewModels
 
         public bool IsCreated { get; set; } = false;
 
-        [Obsolete]
         public MainViewModel()
         {
             string hostName = Dns.GetHostName();
@@ -45,6 +44,7 @@ namespace ImageSender_Server.ViewModels
                             socket.Bind(endPoint);
                             socket.Listen(10);
                             IsCreated = true;
+                            MessageBox.Show("The server has been successfully created!", "Successfully!", MessageBoxButton.OK, MessageBoxImage.Information);
                             var client = socket.Accept();
                             Task.Run(() =>
                             {
@@ -63,7 +63,7 @@ namespace ImageSender_Server.ViewModels
 
                 else
                 {
-                    MessageBox.Show("The server is already created.", "Error!", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show("You are already created to the server.", "Error!", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             });
         }
